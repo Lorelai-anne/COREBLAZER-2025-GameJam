@@ -10,6 +10,16 @@ public class ThirdPersonCam : MonoBehaviour
 
     public float rotationSpeed;
 
+    public Transform combatLookAt;
+
+    public CameraStyle currentStyle;
+    public enum CameraStyle
+    {
+        Basic,
+        Combat,
+        Topdown
+    }
+
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -22,14 +32,24 @@ public class ThirdPersonCam : MonoBehaviour
         Vector3 viewDir = player.position - new Vector3(transform.position.x, player.position.y, transform.position.z);
         orientation.forward = viewDir.normalized;
 
-        //rotate player object
-        float horizontalInput = Input.GetAxis("Horizontal");
-        float verticalInput = Input.GetAxis("Vertical");
-        Vector3 inpurDir = orientation.forward * verticalInput + orientation.right * horizontalInput;
-
-        if (inpurDir != Vector3.zero)
+        if (currentStyle == CameraStyle.Basic)
         {
-            playerObject.forward = Vector3.Slerp(playerObject.forward, inpurDir.normalized, Time.deltaTime * rotationSpeed);
+            //rotate player object
+            float horizontalInput = Input.GetAxis("Horizontal");
+            float verticalInput = Input.GetAxis("Vertical");
+            Vector3 inpurDir = orientation.forward * verticalInput + orientation.right * horizontalInput;
+
+            if (inpurDir != Vector3.zero)
+            {
+                playerObject.forward = Vector3.Slerp(playerObject.forward, inpurDir.normalized, Time.deltaTime * rotationSpeed);
+            }
+        }
+        else if (currentStyle == CameraStyle.Combat)
+        {
+            Vector3 dirToComabtLookAt = combatLookAt.position - new Vector3(transform.position.x, combatLookAt.position.y, transform.position.z);
+            orientation.forward = dirToComabtLookAt.normalized;
+
+            playerObject.forward = dirToComabtLookAt.normalized;
         }
     }
 }
