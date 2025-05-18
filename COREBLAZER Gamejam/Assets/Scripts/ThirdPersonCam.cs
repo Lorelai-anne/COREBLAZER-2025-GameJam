@@ -19,7 +19,7 @@ public class ThirdPersonCam : MonoBehaviour
     private void Update()
     {
         // roatete orientation
-        Vector3 viewDir = player.position - new Vector3 (transform.position.x, player.position.y, transform.position.z);
+        Vector3 viewDir = player.position - new Vector3(transform.position.x, player.position.y, transform.position.z);
         orientation.forward = viewDir.normalized;
 
         //rotate player object
@@ -27,7 +27,7 @@ public class ThirdPersonCam : MonoBehaviour
         float verticalInput = Input.GetAxis("Vertical");
         Vector3 inpurDir = orientation.forward * verticalInput + orientation.right * horizontalInput;
 
-        if(inpurDir != Vector3.zero)
+        if (inpurDir != Vector3.zero)
         {
             playerObject.forward = Vector3.Slerp(playerObject.forward, inpurDir.normalized, Time.deltaTime * rotationSpeed);
         }
