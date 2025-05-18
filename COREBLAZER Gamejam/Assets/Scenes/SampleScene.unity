@@ -659,7 +659,7 @@ MonoBehaviour:
   player: {fileID: 854038950}
   playerObject: {fileID: 1790714433}
   rb: {fileID: 854038952}
-  rotationSpeed: 7
+  rotationSpeed: 14
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -878,12 +878,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 0
-  sprintSpeed: 6.5
-  walkSpeed: 4
+  sprintSpeed: 9.5
+  walkSpeed: 6
   groundDrag: 2
-  jumpForce: 7
+  jumpForce: 15
   jumpCooldown: 0.5
-  airMultiplier: 0.2
+  airMultiplier: 0.4
   jumpKey: 32
   sprintKey: 304
   playerHeight: 2
@@ -899,7 +899,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 854038949}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 2
   m_Drag: 0
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
