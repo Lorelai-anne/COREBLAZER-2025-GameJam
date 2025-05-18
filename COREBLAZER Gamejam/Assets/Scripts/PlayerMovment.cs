@@ -2,68 +2,123 @@ using UnityEngine;
 
 public class PlayerMovment : MonoBehaviour
 {
-    public float playerSpeed;
-    public float sprintSpeed = 8.0f;
-    public float walkspeed = 5.0f;
-    public float jumpHeight = 5.0f;
+    [Header("Movement")]
+    public float moveSpeed;
+    public float sprintSpeed;
+    public float walkSpeed;
 
-    private bool isMoving = false;
-    private bool isGrounded = true;
+    public float groundDrag;
 
-    private Animator anim;
-    private Rigidbody rigidBody;
+    public float jumpForce;
+    public float jumpCooldown;
+    public float airMultiplier;
+    bool readyToJump;
+
+    [Header("Keybinds")]
+    public KeyCode jumpKey = KeyCode.Space;
+    public KeyCode sprintKey = KeyCode.LeftControl;
+
+    [Header("Ground Check")]
+    public float playerHeight;
+    public LayerMask whatIsGround;
+    bool grounded;
+
+
+    public Transform orientation;
+
+    float horizonatalInput;
+    float verticalInput;
+
+    Vector3 moveDirection;
+
+    Rigidbody rb;
 
     private void Start()
     {
-        playerSpeed = walkspeed;
-        anim = GetComponent<Animator>();
-        rigidBody = GetComponent<Rigidbody>();
-    }
-
-    void OnCollisionStay()
-    {
-        isGrounded = true;
+        readyToJump = true;
+        moveSpeed = walkSpeed;
+        rb = GetComponent<Rigidbody>();
+        rb.freezeRotation = true;
     }
 
     private void Update()
     {
-        isMoving = false;
+        grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, whatIsGround);
 
-        if(Input.GetKey(KeyCode.LeftShift) && isGrounded)
+        MyInput();
+        SpeedControl();
+
+        if (grounded)
         {
-            playerSpeed = sprintSpeed;
+            rb.linearDamping = groundDrag;
         }
         else
         {
-            playerSpeed = walkspeed;
+            rb.linearDamping = 0;
         }
-        
+    }
 
-        if ((Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) && isGrounded)
+    private void FixedUpdate()
+    {
+        MovePlayer();
+    }
+
+    private void MyInput()
+    {
+        horizonatalInput = Input.GetAxisRaw("Horizontal");
+        verticalInput = Input.GetAxisRaw("Vertical");
+
+        if(Input.GetKeyDown(jumpKey) && readyToJump && grounded)
         {
-            isMoving = true;
-            transform.position += Vector3.forward * playerSpeed * Time.deltaTime;
-        }
-        else if ((Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) && isGrounded)
-        {
-            isMoving = true;
-            transform.position += Vector3.back * playerSpeed * Time.deltaTime;
-        }
-        else if ((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) && isGrounded)
-        {
-            isMoving = true;
-            transform.position += Vector3.left * playerSpeed * Time.deltaTime;
-        }
-        else if ((Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) && isGrounded)
-        {
-            isMoving = true;
-            transform.position += Vector3.right * playerSpeed * Time.deltaTime;
+            readyToJump = false;
+            Jump();
+            Invoke(nameof(ResetJump), jumpCooldown);
         }
 
-        if (Input.GetKey(KeyCode.Space) && isGrounded)
+        if (Input.GetKey(sprintKey))
         {
-            transform.position += Vector3.up * jumpHeight * Time.deltaTime;
-            
+            moveSpeed = sprintSpeed;
         }
+        else
+        {
+            moveSpeed = walkSpeed;
+        }
+    }
+
+    private void MovePlayer()
+    {
+        //calculate Move direction
+        moveDirection = orientation.forward * verticalInput + orientation.right * horizonatalInput;
+
+        if (grounded)
+        {
+            rb.AddForce(moveDirection.normalized * moveSpeed * 10f, ForceMode.Force);
+        }else if (!grounded)
+        {
+            rb.AddForce(moveDirection.normalized * moveSpeed * 10f*airMultiplier, ForceMode.Force);
+        }
+    }
+
+    private void SpeedControl()
+    {
+        Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+
+        if(flatVel.magnitude > moveSpeed)
+        {
+            Vector3 limitedVel = flatVel.normalized * moveSpeed;
+            rb.linearVelocity = new Vector3(limitedVel.x, rb.linearVelocity.y, limitedVel.z);
+        }
+    }
+
+    private void Jump()
+    {
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x,0f, rb.linearVelocity.z);
+
+        rb.AddForce(transform.up*jumpForce, ForceMode.Impulse);
+    }
+
+    private void ResetJump()
+    {
+        readyToJump = true;
     }
 }
